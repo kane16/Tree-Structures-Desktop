@@ -11,8 +11,22 @@ import model.TreeType
 
 fun main() = Window(title = "Tree structures", IntSize(1024, 768)) {
 
-    MaterialTheme {
-        showView()
+    val backgroundDark = Color(0xFF2B2B2B)
+    val backgroundMedium = Color(0xFF3C3F41)
+    val backgroundLight = Color(0xFF4E5254)
+
+    val material: Colors = darkColors(
+        background = backgroundDark,
+        surface = backgroundMedium,
+        primary = Color.White
+    )
+
+    MaterialTheme(
+        colors = material
+    ) {
+        Surface {
+            showView()
+        }
     }
 
 
@@ -21,6 +35,7 @@ fun main() = Window(title = "Tree structures", IntSize(1024, 768)) {
 @Composable
 fun showView() {
     var isStartView by remember { mutableStateOf(true) }
+    var chosenTree by remember { mutableStateOf("") }
     if (isStartView) {
         Column(
             modifier = Modifier.fillMaxWidth().fillMaxHeight(),
@@ -28,14 +43,20 @@ fun showView() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TreeType.values().forEach {
-                Button(onClick = {
-                    isStartView = false
-                }, Modifier.width(300.dp).padding(20.dp)) {
-                    Text(it.fullname)
-                }
+                Button(
+                    onClick = { isStartView = false; chosenTree = it.fullname },
+                    Modifier.width(300.dp).padding(20.dp)
+                )
+                { Text(it.fullname) }
             }
         }
     } else {
-        Text("Changed")
+        Column(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Changed: $chosenTree")
+        }
     }
 }
