@@ -1,4 +1,4 @@
-package model
+package common.model
 
 enum class TreeType(val fullname: String) {
     BinaryTree("Binary Tree"),
