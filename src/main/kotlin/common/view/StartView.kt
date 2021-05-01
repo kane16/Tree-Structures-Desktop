@@ -16,6 +16,7 @@ import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import common.model.Tree
 import common.model.enums.TreeAction
 import common.model.enums.TreeType
 
@@ -46,6 +47,7 @@ fun showView() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text("Changed: ${chosenTree.value?.fullname}")
+                createTree(Tree(null))
             }
 
             Column(
