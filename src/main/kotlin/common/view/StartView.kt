@@ -1,10 +1,8 @@
 package common.view
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.Text
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
@@ -13,10 +11,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerMoveFilter
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import common.model.TreeType
+import common.model.enums.TreeAction
+import common.model.enums.TreeType
 
 @Composable
 fun showView() {
@@ -33,16 +34,87 @@ fun showView() {
             }
         }
     } else {
-        Column {
-            customButton("Get back", isStartView, 10.dp)
+        Row(Modifier.fillMaxHeight().fillMaxWidth()) {
+            customButton(isStartView, 10.dp)
+            val isInsertEmpty = remember { mutableStateOf(true) }
+            val isDeleteEmpty = remember { mutableStateOf(true) }
+            val currentMode = remember { mutableStateOf(TreeAction.NONE ) }
+
+            Column(
+                modifier = Modifier.fillMaxHeight().fillMaxWidth(0.8f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Changed: ${chosenTree.value?.fullname}")
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(20.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.End
+            ) {
+                Text("Insert node", Modifier.align(Alignment.CenterHorizontally))
+                textInput(TreeAction.INSERT, isInsertEmpty, currentMode)
+                Spacer(Modifier.padding(20.dp).height(16.dp))
+                Text("Delete node", Modifier.align(Alignment.CenterHorizontally))
+                textInput(TreeAction.REMOVE, isDeleteEmpty, currentMode)
+                Spacer(Modifier.height(200.dp))
+                customColorWidthButton("Execute", isInsertEmpty, isDeleteEmpty, 20.dp, 100.dp)
+            }
         }
-        Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Changed: ${chosenTree.value?.fullname}")
-        }
+    }
+}
+
+@Composable
+fun textInput(treeAction: TreeAction, isEmpty: MutableState<Boolean>, currentMode: MutableState<TreeAction>) {
+    val text = remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = text.value,
+        onValueChange = {
+            text.value = it.filter { c -> c.isDigit() }
+            isEmpty.value = it.isEmpty()
+            if(!it.isEmpty()) currentMode.value = treeAction else currentMode.value = TreeAction.NONE
+        },
+        label = { Text("Node value") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        singleLine = true,
+        modifier = Modifier.width(200.dp),
+        enabled = treeAction == currentMode.value || currentMode.value == TreeAction.NONE
+    )
+}
+
+@Composable
+fun customColorWidthButton(
+    text: String,
+    isInsertEmpty: MutableState<Boolean>,
+    isDeleteEmpty: MutableState<Boolean>,
+    padding: Dp,
+    width: Dp
+) {
+    val active = remember { mutableStateOf(false) }
+    Button(
+        onClick = {
+        },
+        Modifier
+            .padding(padding)
+            .width(width)
+            .pointerMoveFilter(
+                onEnter = {
+                    active.value = true
+                    true
+                },
+                onExit = {
+                    active.value = false
+                    true
+                }
+            ),
+        colors = ButtonDefaults.buttonColors(backgroundColor = if (!isInsertEmpty.value) Color.Green else if (!isDeleteEmpty.value) Color.Red else Color.White)
+    ) {
+        Text(
+            text,
+            color = if (active.value) LocalContentColor.current.copy(alpha = 0.60f) else LocalContentColor.current
+        )
     }
 }
 
@@ -82,7 +154,7 @@ fun customWidthButton(
 }
 
 @Composable
-fun customButton(text: String, flagToSwitch: MutableState<Boolean>, padding: Dp) {
+fun customButton(flagToSwitch: MutableState<Boolean>, padding: Dp) {
     val active = remember { mutableStateOf(false) }
     Button(
         onClick = { flagToSwitch.value = !flagToSwitch.value },
