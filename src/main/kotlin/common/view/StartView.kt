@@ -16,6 +16,7 @@ import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import binarytree.model.BinaryTree
 import common.model.Tree
 import common.model.enums.TreeAction
 import common.model.enums.TreeType
@@ -39,15 +40,18 @@ fun showView() {
             customButton(isStartView, 10.dp)
             val isInsertEmpty = remember { mutableStateOf(true) }
             val isDeleteEmpty = remember { mutableStateOf(true) }
+            val currentValue: MutableState<Int?> = remember { mutableStateOf(null) }
             val currentMode = remember { mutableStateOf(TreeAction.NONE ) }
+            val tree: MutableState<BinaryTree> = remember { mutableStateOf(BinaryTree(null)) }
 
             Column(
                 modifier = Modifier.fillMaxHeight().fillMaxWidth(0.8f),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Changed: ${chosenTree.value?.fullname}")
-                createTree(Tree(null))
+                if(tree.value.root != null){
+                    createTree(tree)
+                }
             }
 
             Column(
@@ -56,19 +60,24 @@ fun showView() {
                 horizontalAlignment = Alignment.End
             ) {
                 Text("Insert node", Modifier.align(Alignment.CenterHorizontally))
-                textInput(TreeAction.INSERT, isInsertEmpty, currentMode)
+                textInput(TreeAction.INSERT, isInsertEmpty, currentMode, currentValue)
                 Spacer(Modifier.padding(20.dp).height(16.dp))
                 Text("Delete node", Modifier.align(Alignment.CenterHorizontally))
-                textInput(TreeAction.REMOVE, isDeleteEmpty, currentMode)
+                textInput(TreeAction.REMOVE, isDeleteEmpty, currentMode, currentValue)
                 Spacer(Modifier.height(200.dp))
-                customColorWidthButton("Execute", isInsertEmpty, isDeleteEmpty, 20.dp, 100.dp)
+                customColorWidthButton("Execute", isInsertEmpty, isDeleteEmpty, 20.dp, 100.dp, currentValue, tree)
             }
         }
     }
 }
 
 @Composable
-fun textInput(treeAction: TreeAction, isEmpty: MutableState<Boolean>, currentMode: MutableState<TreeAction>) {
+fun textInput(
+    treeAction: TreeAction,
+    isEmpty: MutableState<Boolean>,
+    currentMode: MutableState<TreeAction>,
+    currentValue: MutableState<Int?>
+) {
     val text = remember { mutableStateOf("") }
 
     OutlinedTextField(
@@ -76,6 +85,7 @@ fun textInput(treeAction: TreeAction, isEmpty: MutableState<Boolean>, currentMod
         onValueChange = {
             text.value = it.filter { c -> c.isDigit() }
             isEmpty.value = it.isEmpty()
+            currentValue.value = text.value.toInt()
             if(!it.isEmpty()) currentMode.value = treeAction else currentMode.value = TreeAction.NONE
         },
         label = { Text("Node value") },
@@ -92,11 +102,18 @@ fun customColorWidthButton(
     isInsertEmpty: MutableState<Boolean>,
     isDeleteEmpty: MutableState<Boolean>,
     padding: Dp,
-    width: Dp
+    width: Dp,
+    inputValue: MutableState<Int?>,
+    tree: MutableState<BinaryTree>
 ) {
     val active = remember { mutableStateOf(false) }
     Button(
         onClick = {
+                  if(!isInsertEmpty.value) {
+                      val insertValue = inputValue.value!!
+                      tree.value + insertValue
+                      println(tree.value.toString())
+                  }
         },
         Modifier
             .padding(padding)

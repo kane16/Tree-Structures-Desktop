@@ -1,7 +1,5 @@
 package binarytree.model
 
-data class Node(val value: Int, val leftChild: Node?, val rightChild: Node?) {
-
-
+data class Node(val value: Int, var leftChild: Node?, var rightChild: Node?) {
 
 }
